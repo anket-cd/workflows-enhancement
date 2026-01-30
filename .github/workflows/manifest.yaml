@@ -44,6 +44,7 @@ jobs:
           grep -q "schemas/hubspot/current/manifest.json" changed.txt && add_system hubspot
           grep -q "schemas/jiminny/current/manifest.json" changed.txt && add_system jiminny
           grep -q "schemas/fireflies/current/manifest.json" changed.txt && add_system fireflies
+          grep -q "schemas/demo/current/manifest.json" changed.txt && add_system demo
 
           MATRIX="{\"include\":[$(IFS=,; echo "${SYSTEMS[*]}")]}"
 
