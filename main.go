@@ -1,9 +1,9 @@
 package main
 
 import (
-	"anket-cd/we/mathsoprn/multi"
-	"anket-cd/we/mathsoprn/substraction"
-	"anket-cd/we/mathsoprn/sum"
+	"anket-cd/we/schemas/multi"
+	"anket-cd/we/schemas/substraction"
+	"anket-cd/we/schemas/sum"
 	"fmt"
 )
 

@@ -13,8 +13,8 @@ permissions:
   id-token: write
 
 env:
-  MANIFEST_LOCAL_PATH: schemas/jiminny/current/manifest.json
-  GCS_OBJECT_PATH: system=jiminny/manifest.json
+  MANIFEST_LOCAL_PATH: schemas/sum/manifest.json
+  GCS_OBJECT_PATH: system=sum/manifest.json
 
 jobs:
   upload:
