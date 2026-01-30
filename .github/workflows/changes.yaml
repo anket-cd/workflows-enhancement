@@ -3,7 +3,7 @@ name: 🚀 Upload Jiminny Manifest.json to GCS
 on:
   push:
     branches:
-      - sandbox
+      - sandboxn
     paths:
       - 'mathsoprn/**'
 
