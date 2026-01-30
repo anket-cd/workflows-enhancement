@@ -41,13 +41,13 @@ jobs:
 
       - name: 🧩 Ensure fireflies manifest exists
         run: |
-          test -f "$JIMINNY_MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $JIMINNY_MANIFEST_LOCAL_PATH"; exit 1; }
+          test -f "$FIREFLIES_MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $JIMINNY_MANIFEST_LOCAL_PATH"; exit 1; }
           jq empty "$JIMINNY_MANIFEST_LOCAL_PATH"
 
       - name: 🧩 Ensure hubspot manifest exists
         run: |
-          test -f "$JIMINNY_MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $JIMINNY_MANIFEST_LOCAL_PATH"; exit 1; }
-          jq empty "$JIMINNY_MANIFEST_LOCAL_PATH"
+          test -f "$HUBSPOT_MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $HUBSPOT_MANIFEST_LOCAL_PATH"; exit 1; }
+          jq empty "$HUBSPOT_MANIFEST_LOCAL_PATH"
 
       - name: 🧩 Ensure jiminny manifest exists
         run: |
@@ -64,3 +64,4 @@ jobs:
           gsutil -h "Content-Type:application/json" -h "Cache-Control:no-store" \
             cp "$JIMINNY_MANIFEST_LOCAL_PATH" "gs://$SCHEMAS_BUCKET/$JIMINNY_GCS_OBJECT_PATH"
           echo "✅ Uploaded to gs://$SCHEMAS_BUCKET/$JIMINNY_GCS_OBJECT_PATH"
+

@@ -1,0 +1,103 @@
+name: 🚀 Upload Manifest.json to GCS
+
+on:
+  push:
+    branches: ["sandboxn"]
+    paths:
+      - "schemas/**/current/manifest.json"
+
+permissions:
+  contents: read
+  id-token: write
+
+# ---------------------------------------
+# JOB 1: Detect which manifests changed
+# ---------------------------------------
+jobs:
+  detect-changes:
+    name: 🔍 Detect changed manifests
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect changed files
+        run: |
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > changed.txt
+          echo "Changed files:"
+          cat changed.txt
+
+      - name: Build dynamic matrix
+        id: matrix
+        run: |
+          SYSTEMS=()
+
+          add_system () {
+            SYSTEMS+=("{\"name\":\"$1\",\"local_path\":\"schemas/$1/current/manifest.json\",\"gcs_path\":\"system=$1/manifest.json\"}")
+          }
+
+          grep -q "schemas/hubspot/current/manifest.json" changed.txt && add_system hubspot
+          grep -q "schemas/jiminny/current/manifest.json" changed.txt && add_system jiminny
+          grep -q "schemas/fireflies/current/manifest.json" changed.txt && add_system fireflies
+
+          MATRIX="{\"include\":[$(IFS=,; echo "${SYSTEMS[*]}")]}"
+
+          echo "Generated matrix:"
+          echo "$MATRIX"
+
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+# ---------------------------------------
+# JOB 2: Upload ONLY changed manifests
+# ---------------------------------------
+  upload:
+    name: ⬆️ Upload manifests to GCS
+    needs: detect-changes
+    if: needs.detect-changes.outputs.matrix != '{"include":[]}'
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 🔐 GCP LOGIN
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SANDBOX_KEY || '' }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Validate manifest.json
+        run: |
+          test -f "${{ matrix.local_path }}"
+          jq empty "${{ matrix.local_path }}"
+
+      - name: Upload ${{ matrix.name }} manifest
+        env:
+          BUCKET: ${{ secrets.SCHEMAS_BUCKET_NAME }}
+        run: |
+          DEST="gs://$BUCKET/${{ matrix.gcs_path }}"
+
+          echo "Uploading:"
+          echo "  Source: ${{ matrix.local_path }}"
+          echo "  Target: $DEST"
+
+          gsutil \
+            -h "Content-Type:application/json" \
+            -h "Cache-Control:no-store" \
+            cp "${{ matrix.local_path }}" "$DEST"
+
+          echo "✅ ${{ matrix.name }} upload completed"
