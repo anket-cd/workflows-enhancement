@@ -3,7 +3,7 @@ name: 🚀 Upload Jiminny Manifest.json to GCS
 on:
   push:
     branches:
-      - sandboxn
+      - sandbo
     paths:
       - 'schemas/**'
 
@@ -11,9 +11,6 @@ permissions:
   actions: read
   contents: read
   id-token: write
-
-  # MANIFEST_LOCAL_PATH: schemas/jiminny/current/manifest.json
-  # GCS_OBJECT_PATH: system=jiminny/manifest.json
 
 env:
   JIMINNY_MANIFEST_LOCAL_PATH: schemas/jiminny/current/manifest.json
