@@ -1,0 +1,53 @@
+name: 🚀 Upload Jiminny Manifest.json to GCS
+
+on:
+  push:
+    branches: [ "sandbox" ]
+    paths:
+      - 'mathsoprn/**'
+      - '.github/workflows/**'
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+env:
+  MANIFEST_LOCAL_PATH: schemas/jiminny/current/manifest.json
+  GCS_OBJECT_PATH: system=jiminny/manifest.json
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest 
+    steps:
+      - name: 🧾 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔑 Authenticate to GCP
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SANDBOX_KEY || '' }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER || '' }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT || '' }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: ⚙️ Install gcloud (for gsutil)
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: ">= 462.0.0"
+
+      - name: 🧩 Ensure manifest exists
+        run: |
+          test -f "$MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $MANIFEST_LOCAL_PATH"; exit 1; }
+          jq empty "$MANIFEST_LOCAL_PATH"
+
+      - name: ☁️ Upload to GCS
+        env:
+          SCHEMAS_BUCKET: ${{ secrets.SCHEMAS_BUCKET_NAME }}
+        run: |
+          if [ -z "$SCHEMAS_BUCKET" ]; then
+            echo "⚠️ SCHEMAS_BUCKET not set"; exit 1;
+          fi
+          gsutil -h "Content-Type:application/json" -h "Cache-Control:no-store" \
+            cp "$MANIFEST_LOCAL_PATH" "gs://$SCHEMAS_BUCKET/$GCS_OBJECT_PATH"
+          echo "✅ Uploaded to gs://$SCHEMAS_BUCKET/$GCS_OBJECT_PATH"

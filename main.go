@@ -1,9 +1,9 @@
 package main
 
 import (
-	"anket-cd/we/multiplication"
-	"anket-cd/we/substraction"
-	"anket-cd/we/sum"
+	"anket-cd/we/mathsoprn/multi"
+	"anket-cd/we/mathsoprn/substraction"
+	"anket-cd/we/mathsoprn/sum"
 	"fmt"
 )
 
@@ -13,5 +13,5 @@ func main() {
 	//---
 	fmt.Println(a, "-", b, "Subtraction is :", substraction.Substraction(a, b))
 	//---
-	fmt.Println(a, "*", b, "Multiplication is :", multiplication.MultiPlication(a, b))
+	fmt.Println(a, "*", b, "Multiplication is :", multi.MultiPlication(a, b))
 }
