@@ -12,9 +12,12 @@ permissions:
   contents: read
   id-token: write
 
+  # MANIFEST_LOCAL_PATH: schemas/jiminny/current/manifest.json
+  # GCS_OBJECT_PATH: system=jiminny/manifest.json
+
 env:
-  MANIFEST_LOCAL_PATH: schemas/sum/manifest.json
-  GCS_OBJECT_PATH: system=sum/manifest.json
+  JIMINNY_MANIFEST_LOCAL_PATH: schemas/jiminny/current/manifest.json
+  JIMINNY_GCS_OBJECT_PATH: system=jiminny/manifest.json
 
 jobs:
   upload:
@@ -36,12 +39,22 @@ jobs:
         with:
           version: ">= 462.0.0"
 
-      - name: 🧩 Ensure manifest exists
+      - name: 🧩 Ensure fireflies manifest exists
         run: |
-          test -f "$MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $MANIFEST_LOCAL_PATH"; exit 1; }
-          jq empty "$MANIFEST_LOCAL_PATH"
+          test -f "$JIMINNY_MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $JIMINNY_MANIFEST_LOCAL_PATH"; exit 1; }
+          jq empty "$JIMINNY_MANIFEST_LOCAL_PATH"
 
-      - name: ☁️ Upload to GCS
+      - name: 🧩 Ensure hubspot manifest exists
+        run: |
+          test -f "$JIMINNY_MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $JIMINNY_MANIFEST_LOCAL_PATH"; exit 1; }
+          jq empty "$JIMINNY_MANIFEST_LOCAL_PATH"
+
+      - name: 🧩 Ensure jiminny manifest exists
+        run: |
+          test -f "$JIMINNY_MANIFEST_LOCAL_PATH" || { echo "Manifest not found at $JIMINNY_MANIFEST_LOCAL_PATH"; exit 1; }
+          jq empty "$JIMINNY_MANIFEST_LOCAL_PATH"
+
+      - name: ☁️ Jiminny Upload to GCS
         env:
           SCHEMAS_BUCKET: ${{ secrets.SCHEMAS_BUCKET_NAME }}
         run: |
@@ -49,5 +62,5 @@ jobs:
             echo "⚠️ SCHEMAS_BUCKET not set"; exit 1;
           fi
           gsutil -h "Content-Type:application/json" -h "Cache-Control:no-store" \
-            cp "$MANIFEST_LOCAL_PATH" "gs://$SCHEMAS_BUCKET/$GCS_OBJECT_PATH"
-          echo "✅ Uploaded to gs://$SCHEMAS_BUCKET/$GCS_OBJECT_PATH"
+            cp "$JIMINNY_MANIFEST_LOCAL_PATH" "gs://$SCHEMAS_BUCKET/$JIMINNY_GCS_OBJECT_PATH"
+          echo "✅ Uploaded to gs://$SCHEMAS_BUCKET/$JIMINNY_GCS_OBJECT_PATH"
