@@ -10,5 +10,5 @@ on:
 
 jobs:
   pr-validation:
-    uses: anket-cd/shared-workflows/.github/workflows/pr_checks.yml@v1
+    uses: anket-cd/shared-workflows/.github/workflows/pr_checks.yml@v1.3.0
     secrets: inherit
