@@ -10,7 +10,7 @@ on:
 jobs:
   pr-validation:
     if: github.actor != 'dependabot[bot]'
-    uses: anket-cd/shared-workflows/.github/workflows/pr-checks.yml@v5
+    uses: anket-cd/shared-workflows/.github/workflows/pr-checks.yml@v6
     secrets: inherit
     with:
       subjectPattern: '^.+$'
